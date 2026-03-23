@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= appName ?> - Login</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* --- THEME VARIABLES --- */
+        :root {
+            --bg-light: #f3f4f6;
+            --bg-dark: #0f172a;
+            --glass-bg-light: rgba(255, 255, 255, 0.7);
+            --glass-bg-dark: rgba(30, 41, 59, 0.7);
+            --glass-border-light: rgba(255, 255, 255, 0.5);
+            --glass-border-dark: rgba(255, 255, 255, 0.1);
+            --text-light: #1f2937;
+            --text-dark: #f8fafc;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+        }
+
+        /* Base Reset & Animated Background */
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+            background-attachment: fixed;
+            background-size: cover;
+            color: var(--text-dark);
+            transition: background-color 0.5s ease, color 0.5s ease;
+        }
+
+        /* Light Theme Overrides */
+        [data-theme="light"] body {
+            background-color: var(--bg-light);
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,90%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,80%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,80%,1) 0, transparent 50%);
+            color: var(--text-light);
+        }
+
+        /* --- GLASSMORPHISM CONTAINER --- */
+        .glass-panel {
+            background: var(--glass-bg-dark);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border-dark);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: all 0.5s ease;
+        }
+
+        [data-theme="light"] .glass-panel {
+            background: var(--glass-bg-light);
+            border: 1px solid var(--glass-border-light);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* UI Elements */
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        h2 { margin: 0; font-weight: 600; }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: background 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="light"] .theme-toggle:hover {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .input-group { margin-bottom: 20px; }
+        .input-group label {
+            display: block; margin-bottom: 8px; font-size: 0.9em; opacity: 0.8;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border-dark);
+            background: rgba(0, 0, 0, 0.2);
+            color: inherit;
+            font-size: 1em;
+            box-sizing: border-box;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="light"] .input-group input {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .input-group input:hover {
+            background: rgba(0, 0, 0, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        [data-theme="light"] .input-group input:hover {
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .input-group input:focus { 
+            border-color: var(--primary); 
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .btn-primary:hover { 
+            background: var(--primary-hover); 
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+            transform: translateY(-2px);
+        }
+        .btn-primary:active { 
+            transform: scale(0.98) translateY(0); 
+            box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Initial Page Loading Overlay */
+        #page-loader {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+        [data-theme="light"] #page-loader { background: var(--bg-light); }
+        
+        .spinner {
+            width: 40px; height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-left-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        [data-theme="light"] .spinner { border-color: rgba(0, 0, 0, 0.1); border-left-color: var(--primary); }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 16px 24px;
+            background: var(--glass-bg-dark);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border-dark);
+            border-left: 4px solid var(--primary);
+            border-radius: 12px;
+            color: var(--text-dark);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transform: translateX(150%);
+            transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            z-index: 100000;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 500;
+        }
+        [data-theme="light"] .toast {
+            background: var(--glass-bg-light);
+            border: 1px solid var(--glass-border-light);
+            border-left: 4px solid var(--primary);
+            color: var(--text-light);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .toast.show {
+            transform: translateX(0);
+        }
+        .error-message {
+            color: #ef4444; font-size: 0.85em; margin-top: 10px; display: none; text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="page-loader">
+        <div class="spinner"></div>
+        <p style="margin-top: 15px; font-weight: 500; opacity: 0.8; font-family: sans-serif;">Loading Workspace...</p>
+    </div>
+
+    <div class="glass-panel" id="login-panel" style="opacity: 0; transform: translateY(20px); transition: opacity 0.8s ease, transform 0.8s ease;">
+        <div class="header-container">
+            <h2>Welcome to <?= appName ?></h2>
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Theme">
+                <i data-lucide="sun" id="theme-icon"></i>
+            </button>
+        </div>
+
+        <div class="input-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" placeholder="name@company.com" required>
+        </div>
+
+        <div class="input-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" placeholder="••••••••" required>
+        </div>
+
+        <button class="btn-primary" onclick="attemptLogin()">Sign In</button>
+        <div class="error-message" id="error-msg">Invalid credentials. Please try again.</div>
+    </div>
+
+    <div id="custom-dialog-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 9999; align-items: center; justify-content: center;">
+        <div class="glass-panel" style="padding: 30px; text-align: center; max-width: 380px; box-sizing: border-box;">
+            <h3 id="dialog-title" style="margin-top: 0; margin-bottom: 15px;">Notification</h3>
+            <p id="dialog-message" style="margin-bottom: 25px; font-size: 0.95em; opacity: 0.9; line-height: 1.5;"></p>
+            <div id="dialog-buttons" style="display: flex; gap: 10px; justify-content: center;">
+                </div>
+        </div>
+    </div>
+
+    <div id="toast-container" class="toast">
+        <i data-lucide="check-circle" style="color: #10b981;"></i>
+        <span id="toast-message">Success!</span>
+    </div>
+
+    <script>
+        // --- TOAST NOTIFICATION LOGIC ---
+        function showToast(message) {
+            const toast = document.getElementById('toast-container');
+            document.getElementById('toast-message').innerText = message;
+            toast.classList.add('show');
+            lucide.createIcons(); // Ensure icon renders
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000); // Auto-hide after 3 seconds
+        }
+
+        // --- PAGE LOAD EVENT ---
+        window.addEventListener('load', function() {
+            const loader = document.getElementById('page-loader');
+            const panel = document.getElementById('login-panel');
+            
+            // Fade out loader
+            loader.style.opacity = '0';
+            loader.style.visibility = 'hidden';
+            
+            // Fade in and slide up the login panel
+            setTimeout(() => {
+                panel.style.opacity = '1';
+                panel.style.transform = 'translateY(0)';
+            }, 100);
+        });
+
+        // --- ENTER KEY LISTENER ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('password');
+            const emailInput = document.getElementById('email');
+            
+            function handleEnter(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    attemptLogin();
+                }
+            }
+            
+            passwordInput.addEventListener('keydown', handleEnter);
+            emailInput.addEventListener('keydown', handleEnter);
+        });
+
+        // --- CUSTOM DIALOG SYSTEM ---
+        const Dialog = {
+            show: function(title, message, buttons) {
+                document.getElementById('dialog-title').innerText = title;
+                document.getElementById('dialog-message').innerText = message;
+                const btnContainer = document.getElementById('dialog-buttons');
+                btnContainer.innerHTML = ''; 
+                
+                buttons.forEach(btn => {
+                    const buttonEl = document.createElement('button');
+                    buttonEl.className = btn.type === 'primary' ? 'btn-primary' : 'btn-secondary';
+                    
+                    // Inline styling for secondary button to match glass theme
+                    if(btn.type !== 'primary') {
+                        buttonEl.style.background = 'rgba(128, 128, 128, 0.2)';
+                        buttonEl.style.color = 'inherit';
+                        buttonEl.style.border = '1px solid var(--glass-border-dark)';
+                        buttonEl.style.padding = '12px';
+                        buttonEl.style.borderRadius = '8px';
+                        buttonEl.style.cursor = 'pointer';
+                        buttonEl.style.flex = '1';
+                        buttonEl.style.fontWeight = '600';
+                        buttonEl.onmouseover = () => buttonEl.style.background = 'rgba(128, 128, 128, 0.4)';
+                        buttonEl.onmouseout = () => buttonEl.style.background = 'rgba(128, 128, 128, 0.2)';
+                    } else {
+                        buttonEl.style.flex = '1';
+                    }
+                    
+                    buttonEl.innerText = btn.text;
+                    buttonEl.onclick = () => {
+                        document.getElementById('custom-dialog-overlay').style.display = 'none';
+                        if (btn.onClick) btn.onClick();
+                    };
+                    btnContainer.appendChild(buttonEl);
+                });
+                
+                document.getElementById('custom-dialog-overlay').style.display = 'flex';
+            },
+            alert: function(title, message, onOk) {
+                this.show(title, message, [{ text: 'OK', type: 'primary', onClick: onOk }]);
+            },
+            confirm: function(title, message, onYes, onNo) {
+                this.show(title, message, [
+                    { text: 'Cancel', type: 'secondary', onClick: onNo },
+                    { text: 'Confirm', type: 'primary', onClick: onYes }
+                ]);
+            }
+        };
+
+        // Initialize Lucide Icons
+        lucide.createIcons();
+
+        // Theme Toggling Logic
+        function toggleTheme() {
+            const htmlTag = document.documentElement;
+            const currentTheme = htmlTag.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            htmlTag.setAttribute('data-theme', newTheme);
+            
+            // Update icon
+            const iconElement = document.getElementById('theme-icon');
+            iconElement.setAttribute('data-lucide', newTheme === 'dark' ? 'sun' : 'moon');
+            lucide.createIcons();
+        }
+
+        // Actual Login Verification using google.script.run
+        function attemptLogin() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const errorMsg = document.getElementById('error-msg');
+
+            if(!email || !password) {
+                errorMsg.innerText = "Please fill in all fields.";
+                errorMsg.style.display = "block";
+                return;
+            }
+
+            // UI Feedback
+            const btn = document.querySelector('.btn-primary');
+            btn.innerText = "Authenticating...";
+            btn.disabled = true; // Prevent multiple clicks
+            errorMsg.style.display = "none";
+
+            // Call the server-side Apps Script function
+            google.script.run
+                .withSuccessHandler(function(response) {
+                    btn.disabled = false;
+                    if (response.success) {
+                        btn.innerText = "Success! Loading...";
+                        btn.style.background = "#10b981"; // Turn button green
+                        
+                        // Save user session data to browser memory
+                        localStorage.setItem('crm_user', JSON.stringify(response.userData));
+                        
+                        // Apply user's preferred theme automatically (forcing lowercase for CSS matching)
+                        if(response.userData.theme) {
+                           const userTheme = String(response.userData.theme).toLowerCase().trim();
+                           document.documentElement.setAttribute('data-theme', userTheme);
+                        }
+                        
+                        // Use Toast Notification & trigger SPA transition automatically
+                        setTimeout(() => {
+                            showToast("Welcome to the workspace, " + response.userData.name + ".");
+                            btn.innerText = "Sign In";
+                            btn.style.background = "var(--primary)";
+                            
+                            // Automatically load dashboard after a brief delay so they see the toast
+                            setTimeout(loadDashboard, 1500);
+                        }, 800);
+                    } else {
+                        btn.innerText = "Sign In";
+                        errorMsg.innerText = response.message;
+                        errorMsg.style.display = "block";
+                    }
+                })
+                .withFailureHandler(function(error) {
+                    btn.disabled = false;
+                    btn.innerText = "Sign In";
+                    errorMsg.innerText = "Connection failed. Please try again.";
+                    errorMsg.style.display = "block";
+                    console.error("Login Error:", error);
+                })
+                .verifyLogin(email, password);
+        }
+
+        // --- SINGLE PAGE APPLICATION ROUTING ---
+        function loadDashboard() {
+            // Add a loading state to the screen
+            document.body.innerHTML = '<div style="display:flex; height:100vh; width:100vw; align-items:center; justify-content:center;"><h2>Loading Dashboard...</h2></div>';
+            
+            google.script.run
+                .withSuccessHandler(function(htmlString) {
+                    // 1. Inject the new UI HTML
+                    document.body.innerHTML = htmlString;
+                    
+                    // 2. The SPA Fix: Extract and execute dormant script tags safely
+                    const scripts = Array.from(document.body.querySelectorAll('script'));
+                    scripts.forEach(oldScript => {
+                        if (oldScript.innerText) {
+                            const newScript = document.createElement('script');
+                            newScript.text = oldScript.innerText;
+                            document.body.appendChild(newScript);
+                        }
+                    });
+                    
+                    // 3. Render icons
+                    lucide.createIcons(); 
+                })
+                .withFailureHandler(function(error) {
+                    // Fallback if the load fails
+                    document.body.innerHTML = '<div style="text-align:center; padding:50px;"><h2>System Error</h2><p>' + error + '</p><button onclick="location.reload()">Reload App</button></div>';
+                })
+                .getDashboardView(); 
+        }
+    </script>
+</body>
+</html>
